@@ -9,11 +9,11 @@
 " :Tabmerge [tab number] [top|bottom|left|right]
 "
 " The tab number can be "$" for the last tab.  If the tab number isn't
-" specified the tab to the right of the current tab is merged.  If there
-" is no right tab, the left tab is merged.
+" specified the tab to the left of the current tab is merged.  If there
+" is no left tab, do nothing.
 "
 " The location specifies where in the current tab to merge the windows.
-" Defaults to "top".
+" Defaults to "g:tabmerge_location".
 "
 " Limitations:
 "
@@ -45,17 +45,21 @@ function! Tabmerge(...)  " {{{1
 	endif
 
 	if !exists('l:where')
-		let where = 'top'
+		if exists('g:tabmerge_location')
+			let where = g:tabmerge_location
+		else
+			let where = 'top'
+		endif
 	endif
 
 	if !exists('l:tabnr')
-		if type(tabpagebuflist(tabpagenr() + 1)) == 3
-			let tabnr = tabpagenr() + 1
-		elseif type(tabpagebuflist(tabpagenr() - 1)) == 3
+		"if type(tabpagebuflist(tabpagenr() + 1)) == 3
+			"let tabnr = tabpagenr() + 1
+		if type(tabpagebuflist(tabpagenr() - 1)) == 3
 			let tabnr = tabpagenr() - 1
 		else
 			echohl ErrorMsg
-			echo "Already only one tab"
+			echo "No left tab or only 1 tab"
 			echohl None
 			return
 		endif
@@ -108,6 +112,7 @@ function! Tabmerge(...)  " {{{1
 	endfor
 
 	exe 'tabclose ' . tabnr
+	exe "normal \<C-W>\<C-w>"
 
 	let &switchbuf = save_switchbuf
 endfunction
